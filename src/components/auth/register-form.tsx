@@ -22,34 +22,36 @@ import { Loader2, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { CardWrapper } from "./card-wrapper";
-import { LoginSchema } from "@/schemas/auth";
+
 import { PasswordInput } from "./password-input";
 import { FormError } from "../form-error";
 import { FormSuccess } from "../form-success";
-import { login } from "@/actions/login";
+import { register } from "@/actions/register";
+import { RegisterSchema } from "@/schemas/auth";
 
-interface LoginFormProps {
+interface LRegisterFormProps {
   callbackUrl?: string;
 }
 
-export const LoginForm = ({ callbackUrl }: LoginFormProps) => {
+export const RegisterForm = ({ callbackUrl }: LRegisterFormProps) => {
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof RegisterSchema>>({
+    resolver: zodResolver(RegisterSchema),
     defaultValues: {
       email: "",
       password: "",
+      name: "",
     },
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
     setError("");
     setSuccess("");
     startTransition(() => {
-      login(values).then((data) => {
+      register(values).then((data) => {
         setError(data.error);
         setSuccess(data.success);
       });
@@ -58,13 +60,31 @@ export const LoginForm = ({ callbackUrl }: LoginFormProps) => {
 
   return (
     <CardWrapper
-      headerLabel="Welcome back"
-      backButtonLabel="Don't have an account?"
-      backButtonHref="/auth/register"
+      headerLabel="Create an account"
+      backButtonLabel="Already have an account?"
+      backButtonHref="/auth/login"
     >
       <Form {...form}>
         <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <div className=" space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex w-full">Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Company name"
+                      type="text"
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="email"
@@ -83,6 +103,7 @@ export const LoginForm = ({ callbackUrl }: LoginFormProps) => {
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="password"
@@ -111,7 +132,7 @@ export const LoginForm = ({ callbackUrl }: LoginFormProps) => {
               </>
             ) : (
               <>
-                <LogIn className="mr-2 h-4 w-4" /> Login
+                <LogIn className="mr-2 h-4 w-4" /> Register
               </>
             )}
           </Button>
