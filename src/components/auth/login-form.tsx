@@ -25,13 +25,13 @@ import { LoginSchema } from "@/schemas/auth";
 import { PasswordInput } from "./password-input";
 import { FormError } from "../form-error";
 import { FormSuccess } from "../form-success";
+import { login } from "@/actions/login";
 
 interface LoginFormProps {
   callbackUrl?: string;
 }
 
 export const LoginForm = ({ callbackUrl }: LoginFormProps) => {
-  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -41,21 +41,8 @@ export const LoginForm = ({ callbackUrl }: LoginFormProps) => {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
-    const result = await signIn("credentials", {
-      redirect: false,
-      username: data.email,
-      password: data.password,
-    });
-
-    if (!result?.ok) {
-      toast.error(result?.error);
-      return;
-    }
-    startTransition(() => {
-      router.push(callbackUrl ? callbackUrl : "/dashboard");
-    });
-    toast.success("Welcome To WP Auth 2024");
+  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+    login(values);
   };
 
   return (
@@ -78,7 +65,6 @@ export const LoginForm = ({ callbackUrl }: LoginFormProps) => {
                       {...field}
                       placeholder="john.doe@example.com"
                       type="email"
-                      disabled={isPending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -92,11 +78,7 @@ export const LoginForm = ({ callbackUrl }: LoginFormProps) => {
                 <FormItem>
                   <FormLabel className="flex w-full">Password</FormLabel>
                   <FormControl>
-                    <PasswordInput
-                      {...field}
-                      placeholder="Password"
-                      disabled={isPending}
-                    />
+                    <PasswordInput {...field} placeholder="Password" />
                   </FormControl>
 
                   <FormMessage />
@@ -106,16 +88,10 @@ export const LoginForm = ({ callbackUrl }: LoginFormProps) => {
           </div>
           <FormError message="" />
           <FormSuccess message="" />
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4" /> Processing
-              </>
-            ) : (
-              <>
-                <LogIn className="mr-2 h-4 w-4" /> Login
-              </>
-            )}
+          <Button type="submit" className="w-full">
+            <>
+              <LogIn className="mr-2 h-4 w-4" /> Login
+            </>
           </Button>
         </form>
       </Form>
