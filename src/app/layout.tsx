@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/providers/ThemeProvider";
+import { Toaster } from "sonner";
+import { AuthProvider } from "@/providers/AuthProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -11,12 +14,34 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" suppressHydrationWarning={true}>
+      <body className={`${inter.className} ${"theme-zinc"}`}>
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster
+              toastOptions={{
+                unstyled: true,
+                classNames: {
+                  error: "bg-red-400",
+                  success: "text-green-400",
+                  warning: "text-yellow-400",
+                  info: "bg-blue-400",
+                },
+              }}
+            />
+          </ThemeProvider>
+        </AuthProvider>
+      </body>
     </html>
   );
 }
