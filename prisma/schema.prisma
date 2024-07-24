@@ -15,7 +15,7 @@ datasource db {
 
 model User {
  id              String @id @default(auto()) @map("_id") @db.ObjectId
- name       String
+ name            String
  email           String   @unique 
  active          Boolean  @default(false)
  emailVerified   DateTime?
@@ -23,20 +23,14 @@ model User {
  password        String
  colorScheme     String        @default("theme-orange")
  accounts        Account[]
- sessions        Session[]
+ 
  createdAt       DateTime @default(now())
  updatedAt       DateTime @updatedAt
+
+ @@map("users")
  
 }
 
-
-model Session {
-  id           String @id @default(auto()) @map("_id") @db.ObjectId
-  sessionToken String   @unique
-  userId       String  @db.ObjectId
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
 
 model Account {
  id String @id @default(auto()) @map("_id") @db.ObjectId
@@ -52,5 +46,7 @@ model Account {
  id_token           String?  @db.String
  session_state      String?
  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
  @@unique([provider, providerAccountId])
+ @@map("accounts")
 }
